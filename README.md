@@ -58,6 +58,7 @@ When the ESP32 is connected to Wi-Fi, open its IP address in a browser to view t
 
 ## Notes
 
+- Version 1 completely vibecoded !
 - This project scans for devices whose advertised name starts with `GOVEE_NAME_PREFIX`.
 - Some Govee models may use a different name prefix or may not expose a name in their advertisements. Adjust `isGoveeAdvertisement()` in `src/main.cpp` to match your device.
 - The default MQTT port is `1883`. Configure credentials if your broker requires authentication.
