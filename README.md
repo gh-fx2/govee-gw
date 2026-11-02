@@ -56,6 +56,10 @@ Example payload:
 
 When the ESP32 is connected to Wi-Fi, open its IP address in a browser to view the live sensor dashboard. The page shows one combined gauge per sensor: temperature on the outer ring (12–28 °C), humidity on the inner ring (green from 40–60%, orange otherwise), and a four-block battery indicator. Readings refresh every five seconds. Tap a sensor name to set an alias (up to 20 characters); the `×` button removes it. Up to eight aliases are stored persistently in ESP32 NVS and remain available after reboot. Sensors remain listed with their last readings for the entire current boot, even if they stop transmitting; the page shows when each sensor was last heard. The sensor list itself resets when the ESP32 reboots. Sensor scanning and the dashboard continue to work if the MQTT broker is temporarily unavailable.
 
+### Screenshot
+
+![App Screenshot](screenshot.png)
+
 ## Notes
 
 - Version 1 completely vibecoded !
