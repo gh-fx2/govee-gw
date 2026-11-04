@@ -127,17 +127,6 @@ bool connectToMqtt() {
   return true;
 }
 
-String manufacturerDataAsHex(const std::string& data) {
-  static constexpr char kHexDigits[] = "0123456789ABCDEF";
-  String encoded;
-  encoded.reserve(data.length() * 2);
-  for (unsigned char byte : data) {
-    encoded += kHexDigits[byte >> 4];
-    encoded += kHexDigits[byte & 0x0F];
-  }
-  return encoded;
-}
-
 bool isSupportedSensor(const std::string& name) {
   return name.find("H5104") != std::string::npos ||
          name.find("H5110") != std::string::npos;
@@ -454,8 +443,9 @@ void publishAdvertisement(BLEAdvertisedDevice& device) {
   StaticJsonDocument<384> payload;
   payload["name"] = name.c_str();
   payload["address"] = address;
+  const int aliasIndex = findAliasIndex(address);
+  payload["alias"] = aliasIndex >= 0 ? deviceAliases[aliasIndex].name : "";
   payload["rssi"] = device.getRSSI();
-  payload["manufacturer_data"] = manufacturerDataAsHex(manufacturerData);
   JsonObject sensors = payload.createNestedObject("sensors");
   sensors["temperature_c"] = readings.temperatureCelsius;
   sensors["humidity_percent"] = readings.humidityPercent;

@@ -40,8 +40,8 @@ Example payload:
 {
   "name": "GVH5104_1234",
   "address": "aa:bb:cc:dd:ee:ff",
+  "alias": "Wohnzimmer",
   "rssi": -62,
-  "manufacturer_data": "...",
   "sensors": {
     "temperature_c": 23.3,
     "humidity_percent": 21.4,
@@ -50,11 +50,17 @@ Example payload:
 }
 ```
 
-`manufacturer_data` is the raw manufacturer-specific BLE data encoded as hexadecimal. Messages are published only for H5104 and H5110 advertisements containing a valid temperature, humidity, and battery reading. The `sensors` object's temperature is in Celsius; humidity and battery are percentages. Non-data advertisements, invalid readings, and unsupported models are not published.
+`alias` contains the sensor's configured dashboard alias, or an empty string if no alias is set. Alias changes are included in the next message published for that sensor. Messages are published only for H5104 and H5110 advertisements containing a valid temperature, humidity, and battery reading. The `sensors` object's temperature is in Celsius; humidity and battery are percentages. Non-data advertisements, invalid readings, and unsupported models are not published.
 
 ## Web dashboard
 
 When the ESP32 is connected to Wi-Fi, open its IP address in a browser to view the live sensor dashboard. The page shows one combined gauge per sensor: temperature on the outer ring (12–28 °C), humidity on the inner ring (green from 40–60%, orange otherwise), and a four-block battery indicator. Readings refresh every five seconds. Tap a sensor name to set an alias (up to 20 characters); the `×` button removes it. Up to eight aliases are stored persistently in ESP32 NVS and remain available after reboot. Sensors remain listed with their last readings for the entire current boot, even if they stop transmitting; the page shows when each sensor was last heard. The sensor list itself resets when the ESP32 reboots. Sensor scanning and the dashboard continue to work if the MQTT broker is temporarily unavailable.
+
+### Standalone MQTT dashboard
+
+The project also includes [mqtt-dashboard.html](./mqtt-dashboard.html), a separate dashboard that uses the same visual design but reads sensor values directly from the MQTT broker over WebSockets. It does not allow aliases to be edited. Open the file in a browser after setting `MQTT_CONFIG` near the top of the file: enter the broker host, its WebSocket port and path, TLS setting, optional credentials, and topic. The broker must have an MQTT-over-WebSocket listener enabled; the default port and path in the file are examples and may need to match your broker. If the broker restricts WebSocket origins, serve the HTML from a local web server instead of opening it as a `file://` URL.
+
+The page loads the MQTT.js browser library from a CDN, so it needs internet access to load that script. Broker credentials entered in the HTML are visible to anyone who can access the file; use a read-only MQTT account and prefer TLS (`wss`) when supported.
 
 ### Screenshot
 
