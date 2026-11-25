@@ -127,9 +127,12 @@ bool connectToMqtt() {
   return true;
 }
 
-bool isSupportedSensor(const std::string& name) {
-  return name.find("H5104") != std::string::npos ||
-         name.find("H5110") != std::string::npos;
+int isSupportedSensor(const std::string& name) {
+  if ( name.find("H5075") != std::string::npos )
+    return 2;
+
+  return (name.find("H5104") != std::string::npos || 
+          name.find("H5110") != std::string::npos  ) ? 1 : 0;
 }
 
 struct SensorReadings {
@@ -296,21 +299,22 @@ void handleAliasUpdate() {
   webServer.send(200, "application/json", "{\"saved\":true}");
 }
 
-bool decodeSensorReadings(const std::string& data, SensorReadings& readings) {
+bool decodeSensorReadings(const std::string& data, SensorReadings& readings, int sensorType) {
   if (data.length() < 8) {
     return false;
   }
 
+  const int offset = (sensorType == 2) ? 3 : 4; // H5075 has a different data layout
   // Manufacturer data starts with the two-byte company identifier.
   const uint32_t encoded =
-      (static_cast<uint8_t>(data[4]) << 16) |
-      (static_cast<uint8_t>(data[5]) << 8) |
-      static_cast<uint8_t>(data[6]);
+      (static_cast<uint8_t>(data[offset]) << 16) |
+      (static_cast<uint8_t>(data[offset+1]) << 8) |
+      static_cast<uint8_t>(data[offset+2]);
   const bool isNegative = (encoded & 0x800000) != 0;
   const uint32_t magnitude = encoded & 0x7FFFFF;
   const float temperature = static_cast<float>(magnitude / 1000) / 10.0f;
   const float humidity = static_cast<float>(magnitude % 1000) / 10.0f;
-  const uint8_t battery = static_cast<uint8_t>(data[7]);
+  const uint8_t battery = static_cast<uint8_t>(data[offset+3]);
 
   readings.temperatureCelsius = isNegative ? -temperature : temperature;
   readings.humidityPercent = humidity;
@@ -425,13 +429,14 @@ void publishAdvertisement(BLEAdvertisedDevice& device) {
   const String topic = String("govee/raw/") + address;
   const std::string name = device.getName();
   const std::string manufacturerData = device.getManufacturerData();
-  if (!isSupportedSensor(name)) {
+  const int sensorType = isSupportedSensor(name);
+  if (!sensorType) {
     return;
   }
 
   SensorReadings readings;
-  if (!decodeSensorReadings(manufacturerData, readings)) {
-    //Serial.printf("Skipping non-data or invalid advertisement from %s\n", address.c_str());
+  if (!decodeSensorReadings(manufacturerData, readings, sensorType)) {
+    Serial.printf("Skipping non-data or invalid advertisement from %s\n", address.c_str());
     return;
   }
 

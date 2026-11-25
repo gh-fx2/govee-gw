@@ -50,7 +50,7 @@ Example payload:
 }
 ```
 
-`alias` contains the sensor's configured dashboard alias, or an empty string if no alias is set. Alias changes are included in the next message published for that sensor. Messages are published only for H5104 and H5110 advertisements containing a valid temperature, humidity, and battery reading. The `sensors` object's temperature is in Celsius; humidity and battery are percentages. Non-data advertisements, invalid readings, and unsupported models are not published.
+`alias` contains the sensor's configured dashboard alias, or an empty string if no alias is set. Alias changes are included in the next message published for that sensor. Messages are published only for H5104, H5110 and H5075 advertisements containing a valid temperature, humidity, and battery reading. The `sensors` object's temperature is in Celsius; humidity and battery are percentages. Non-data advertisements, invalid readings, and unsupported models are not published.
 
 ## Web dashboard
 
